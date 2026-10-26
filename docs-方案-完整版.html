@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>15 灯跑马灯喝酒游戏 · 技术方案</title>
+<style>
+  :root{
+    --ink:#1c1a17; --ink2:#4a453e; --ink3:#857e73;
+    --line:#e4dfd3; --line2:#d3ccbc;
+    --paper:#ffffff; --page:#f7f5f0; --fill:#f4f1e9;
+    --accent:#96581b; --accent-soft:#fbf3e6;
+    --good:#2f6b46; --good-soft:#eef5f0;
+    --warn:#8a3d2a; --warn-soft:#fbeeea;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:32px 16px 64px;
+    background:var(--page); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:14px; line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px; margin:0 auto;}
+
+  header.head{
+    background:var(--paper); border:1px solid var(--line); border-radius:4px;
+    padding:28px 32px 24px; margin-bottom:14px;
+  }
+  .kicker{font-size:12px; letter-spacing:.14em; color:var(--accent); font-weight:500; text-transform:uppercase;}
+  h1{font-size:25px; line-height:1.35; margin:8px 0 10px; font-weight:600; letter-spacing:-.01em;}
+  .sub{color:var(--ink2); font-size:13.5px; margin:0;}
+  .meta{
+    margin-top:18px; padding-top:14px; border-top:1px dashed var(--line2);
+    display:flex; flex-wrap:wrap; gap:6px 26px; font-size:12.5px; color:var(--ink3);
+  }
+  .meta b{color:var(--ink2); font-weight:500;}
+
+  section{
+    background:var(--paper); border:1px solid var(--line); border-radius:4px;
+    padding:26px 32px 28px; margin-bottom:14px;
+  }
+  h2{
+    font-size:16px; font-weight:600; margin:0 0 16px; padding-left:11px;
+    border-left:3px solid var(--accent); line-height:1.4;
+  }
+  h3{font-size:13.5px; font-weight:600; margin:22px 0 8px; color:var(--ink);}
+  h3:first-of-type{margin-top:4px;}
+  p{margin:0 0 12px; color:var(--ink2);}
+  p:last-child{margin-bottom:0;}
+  strong{color:var(--ink); font-weight:600;}
+  code{
+    font-family:"SF Mono",Consolas,"Cascadia Mono",monospace; font-size:12.5px;
+    background:var(--fill); padding:1px 5px; border-radius:3px; color:var(--accent);
+  }
+
+  table{width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:8px 11px; text-align:left; vertical-align:top;}
+  th{background:var(--fill); font-weight:600; color:var(--ink); white-space:nowrap;}
+  td{color:var(--ink2);}
+  td.num,th.num{text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
+  tr.sum td{background:var(--accent-soft); font-weight:600; color:var(--ink);}
+
+  .callout{
+    border:1px solid var(--line2); border-left:3px solid var(--accent);
+    background:var(--accent-soft); padding:14px 18px; margin:16px 0; border-radius:3px;
+  }
+  .callout .t{font-weight:600; font-size:13px; margin-bottom:5px; color:var(--ink);}
+  .callout p{font-size:13px; margin:0;}
+  .callout.risk{border-left-color:var(--warn); background:var(--warn-soft);}
+  .callout.ok{border-left-color:var(--good); background:var(--good-soft);}
+
+  ol.steps{counter-reset:s; list-style:none; padding:0; margin:12px 0;}
+  ol.steps li{
+    counter-increment:s; position:relative; padding-left:34px; margin-bottom:13px; color:var(--ink2);
+  }
+  ol.steps li::before{
+    content:counter(s); position:absolute; left:0; top:2px;
+    width:21px; height:21px; border:1px solid var(--accent); border-radius:50%;
+    color:var(--accent); font-size:11.5px; font-weight:600;
+    display:flex; align-items:center; justify-content:center; line-height:1;
+  }
+  ol.steps li b{color:var(--ink); font-weight:600;}
+
+  ul.dot{margin:8px 0; padding-left:20px; color:var(--ink2);}
+  ul.dot li{margin-bottom:6px;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .card{border:1px solid var(--line); border-radius:3px; padding:14px 16px; background:var(--fill);}
+  .card .h{font-size:13px; font-weight:600; margin-bottom:6px; color:var(--ink);}
+  .card p, .card ul{margin:0; font-size:12.5px; color:var(--ink2);}
+  .card ul{padding-left:17px;}
+  .card li{margin-bottom:4px;}
+
+  .tag{
+    display:inline-block; font-size:11.5px; padding:1px 7px; border-radius:2px;
+    border:1px solid var(--line2); background:var(--fill); color:var(--ink2);
+    margin-right:5px; line-height:1.6;
+  }
+  .tag.a{border-color:var(--accent); color:var(--accent); background:var(--accent-soft);}
+  .tag.g{border-color:var(--good); color:var(--good); background:var(--good-soft);}
+
+  footer{text-align:center; font-size:12px; color:var(--ink3); padding:10px 0 0;}
+
+  @media (max-width:640px){
+    body{padding:16px 10px 40px;}
+    section,header.head{padding:20px 18px;}
+    .grid2{grid-template-columns:1fr;}
+    h1{font-size:21px;}
+    table{font-size:12.5px;}
+    th,td{padding:6px 8px;}
+  }
+  @media print{
+    body{background:#fff; padding:0; font-size:11.5pt;}
+    section,header.head{break-inside:avoid; border-color:#ccc;}
+    .card{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="head">
+  <div class="kicker">Technical Proposal</div>
+  <h1>15 灯跑马灯喝酒游戏 · 控制方案</h1>
+  <p class="sub">硬件由甲方按清单自制，软件（固件 + 配置端）由乙方提供。本方案解决一个核心问题：<b>如何在"看起来是随机停下"的前提下，精确控制停下来的亮灯数量和排除指定灯。</b></p>
+  <div class="meta">
+    <span><b>灯数</b> 15 路</span>
+    <span><b>亮灯数</b> 2 或 3（可切换）</span>
+    <span><b>控制</b> 单按钮 + 禁用开关 + 手机网页</span>
+    <span><b>推荐硬件</b> ESP32 + WS2812B</span>
+  </div>
+</header>
+
+<section>
+  <h2>一、需求确认</h2>
+  <p>先把您的描述翻译成技术语言，确认没有理解偏差：</p>
+  <table>
+    <thead><tr><th style="width:44%">您说的</th><th>技术上对应什么</th></tr></thead>
+    <tbody>
+      <tr><td>15 个灯，开始后像跑马灯一样无规则来回闪</td><td>15 路独立可控灯珠；跑马灯阶段的速度随机变化，看不出规律</td></tr>
+      <tr><td>一拍它就开始转，再一拍就停</td><td>一个大按钮，两次按压分别是「启动」和「锁定结果」</td></tr>
+      <tr><td>停的时候要求亮 2 盏或 3 盏，可以调</td><td>亮灯数量是参数，出厂默认 2，可切 3，掉电不丢</td></tr>
+      <tr><td>可以用遥控器或线的方式，要求哪个灯不亮</td><td>每盏灯一个独立禁用开关；被禁用的灯<b>不参与抽取、全程不亮</b></td></tr>
+      <tr><td>比如亮两盏时，粉色那盏别亮，亮哪个都行</td><td>排除某盏后，结果从剩余灯里随机取，不是固定分配</td></tr>
+      <tr><td>硬件我负责，需要你们做个软件</td><td>我们出固件源码 + 手机配置页 + 接线图 + 烧录教程</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>二、核心原理：先定结果，再演过程</h2>
+  <p>这一节是整个方案的技术关键，也是必须提前讲清楚的一点。</p>
+
+  <div class="callout risk">
+    <div class="t">纯硬件的跑马灯做不到您要的效果</div>
+    <p>跑马灯物理上停下来，只能停在<b>一盏</b>灯上。您要的是停下来恰好亮 2 盏或 3 盏，还要排除指定灯——这不可能靠「让灯转到那停」实现，必须由软件来演。</p>
+  </div>
+
+  <p>做法分三步：</p>
+  <ol class="steps">
+    <li><b>拍停的瞬间，软件先在内部把结果定好。</b>从「当前启用的灯」里随机抽取 N 盏（N = 2 或 3），抽完就固定不变。这一步客人看不见。</li>
+    <li><b>用 0.6~0.9 秒把这盏结果「演」出来。</b>跑马灯从高速逐渐减速，跳跃间隔越拉越长，最后几次跳跃精准落在那几盏目标灯上，其余灯全部熄灭。视觉上就是转盘慢慢停下来的效果。</li>
+    <li><b>结果呈现。</b>目标灯高亮并闪两下，配合提示音，保持十余秒让全场看清谁喝。</li>
+  </ol>
+
+  <div class="callout ok">
+    <div class="t">为什么客人不会看出破绽</div>
+    <p>因为跑马灯阶段本来就是<b>无规则乱闪</b>，没有刻度、没有指针、没有可对照的固定位置。客人无法从「停在哪」反推「应该亮几盏」——两者的因果关系在观感上根本不存在。这跟老虎机、抽奖转盘是同一类做法，也是行业内通行方案。</p>
+  </div>
+
+  <p>另外一个附带好处：结果由芯片的<b>硬件随机数</b>产生，跟跑马灯走到哪儿完全无关。如果哪天客人质疑公平性，这反而是最容易解释的一种——比"手动停"更公平。</p>
+</section>
+
+<section>
+  <h2>三、硬件方案对比</h2>
+  <p>两条路线都能实现，成本和质感差别很大。下表是实际采购口径：</p>
+  <table>
+    <thead><tr><th>对比项</th><th>方案 A · 幻彩灯珠<br><span style="font-weight:400;color:var(--ink3)">WS2812B + ESP32</span></th><th>方案 B · 复古灯泡<br><span style="font-weight:400;color:var(--ink3)">220V 灯丝灯 + 继电器</span></th></tr></thead>
+    <tbody>
+      <tr><td>灯具</td><td>5V 幻彩灯珠 15 颗（可加乳白球罩，像小灯泡）</td><td>E27 灯丝灯泡 15 个</td></tr>
+      <tr><td>控制方式</td><td>3 根线菊花链，占用 1 个 IO 口</td><td>15 路固态继电器，15 根控制线</td></tr>
+      <tr><td>颜色</td><td>全彩，可随店里主题切换</td><td>单一暖光</td></tr>
+      <tr><td>亮度</td><td>中等（墙面、吊顶装饰够用）</td><td>高（可兼做照明）</td></tr>
+      <tr><td>用电安全</td><td><span class="tag g">5V 安全电压</span> 洒酒、碰水不构成危险</td><td><span class="tag" style="border-color:var(--warn);color:var(--warn);background:var(--warn-soft)">220V 带电</span> 需漏保、接地、防水盒</td></tr>
+      <tr><td>装配工时</td><td>约半天</td><td>约 1.5~2 天，且需持证电工</td></tr>
+      <tr><td>预估成本</td><td class="num">约 390 元</td><td class="num">约 800~900 元</td></tr>
+      <tr><td>维护</td><td>坏一颗单独换，插接即用</td><td>灯泡可换，继电器故障需拆箱</td></tr>
+      <tr><td>外观质感</td><td>加乳白罩后接近普通小灯泡</td><td>钨丝灯的复古感无可替代</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="t">推荐方案 A，理由三条</div>
+    <p>① 酒吧环境一定有酒水泼溅，5V 是安全电压，用电风险接近于零，出了事也不用担责；② 灯色可随时改，配合不同主题活动；③ 成本是方案 B 的一半，装配工时是四分之一。<br>
+    只有在一种情况下才建议走 B：<b>老板明确就要钨丝灯泡那种复古质感</b>，并且愿意接受独立配电箱 + 电工施工。</p>
+  </div>
+</section>
+
+<section>
+  <h2>四、主推方案物料清单（15 灯）</h2>
+  <p>按方案 A 配置，量大可再降。单价为市场零售参考价：</p>
+  <table>
+    <thead><tr><th class="num" style="width:8%">#</th><th style="width:30%">物料</th><th>规格要求</th><th class="num" style="width:8%">数量</th><th class="num" style="width:14%">小计</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>主控板</td><td>ESP32-WROOM-32 开发板（带 WiFi，双核）</td><td class="num">1</td><td class="num">¥30</td></tr>
+      <tr><td class="num">2</td><td>幻彩灯珠</td><td>WS2812B 5V，12mm 圆头乳白罩，IP67 防水，建议买 17 颗备 2</td><td class="num">17</td><td class="num">¥51</td></tr>
+      <tr><td class="num">3</td><td>电平转换模块</td><td>74AHCT125（3.3V 转 5V，<b>必装</b>，见接线要点）</td><td class="num">1</td><td class="num">¥10</td></tr>
+      <tr><td class="num">4</td><td>开关电源</td><td>5V / 10A 带金属壳，带过流保护</td><td class="num">1</td><td class="num">¥40</td></tr>
+      <tr><td class="num">5</td><td>拍击按钮</td><td>100mm 街机半球按钮，常开触点，IP66 防水，带 5V 背光更佳</td><td class="num">1</td><td class="num">¥45</td></tr>
+      <tr><td class="num">6</td><td>禁用开关</td><td>15 位小型拨动开关板（或 15 个独立小开关），每位对应一盏灯</td><td class="num">1</td><td class="num">¥30</td></tr>
+      <tr><td class="num">7</td><td>灯箱结构</td><td>亚克力 / 木板开孔 + 灯座，激光切割另计</td><td class="num">1</td><td class="num">¥150</td></tr>
+      <tr><td class="num">8</td><td>线材辅料</td><td>18AWG 电源线、3 芯信号线、冷压端子、热缩管、保险丝座、DC 头</td><td class="num">1</td><td class="num">¥40</td></tr>
+      <tr class="sum"><td class="num">—</td><td colspan="3">合计（不含灯箱外发加工与人工）</td><td class="num">约 ¥396</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--ink3)">可选的远程控制：433MHz 无线遥控模块（1 收 4 发）约 ¥20，用于吧台随手切换 2/3 盏。</p>
+</section>
+
+<section>
+  <h2>五、接线要点</h2>
+  <p>这六条是这个方案里最容易翻车的地方，按清单做能省掉一晚上的排查：</p>
+  <table>
+    <thead><tr><th class="num" style="width:7%">#</th><th style="width:34%">要点</th><th>不做会怎样</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>ESP32 输出 3.3V 逻辑，WS2812B 要求数据线高电平 ≥3.5V，<b>必须经 74AHCT125 升到 5V</b></td><td>颜色乱闪、后半段灯完全不受控、偶尔全灭</td></tr>
+      <tr><td class="num">2</td><td>数据线串 330~470Ω 电阻，尽量靠近第一颗灯</td><td>信号振铃，长线时出现随机闪白</td></tr>
+      <tr><td class="num">3</td><td>电源输出端并 1000µF 电解电容</td><td>上电瞬间电流冲击，第一颗灯容易烧</td></tr>
+      <tr><td class="num">4</td><td>灯的 VCC / GND <b>从电源直接拉</b>，不要从主板的 5V 引脚取电</td><td>电流超载，烧主板稳压芯片</td></tr>
+      <tr><td class="num">5</td><td>注意灯珠方向，DIN 进 DOUT 出，接反了后面全不亮</td><td>只有前几颗亮，后面一片黑</td></tr>
+      <tr><td class="num">6</td><td>按钮线远离数据线，按钮两端并 100nF 电容消抖</td><td>拍一下触发两次，游戏变成连跳</td></tr>
+    </tbody>
+  </table>
+  <p>15 颗灯满载功耗约 5V × 0.9A ≈ 4.5W，10A 电源余量充足，后续加到 30 颗也不用换。</p>
+</section>
+
+<section>
+  <h2>六、软件功能与可调参数</h2>
+  <p>固件跑在 ESP32 上，内置一个手机配置页——<b>不用装任何 App</b>，手机连上设备发出的 WiFi，浏览器打开就是设置界面。</p>
+
+  <h3>运行状态</h3>
+  <p>待机（呼吸微光，等拍）→ 乱闪（一拍启动）→ 减速收束（二拍锁定）→ 亮灯展示（保持十余秒）→ 自动回到待机。</p>
+
+  <h3>可调参数</h3>
+  <table>
+    <thead><tr><th style="width:30%">参数</th><th style="width:26%">可设范围</th><th class="num" style="width:14%">默认值</th><th>怎么改</th></tr></thead>
+    <tbody>
+      <tr><td>亮灯数量</td><td>2 盏 / 3 盏</td><td class="num">2</td><td>手机网页，或遥控器 A / B 键</td></tr>
+      <tr><td>禁用灯</td><td>1~15 号任意组合</td><td class="num">全启用</td><td>拨动开关（自动同步），或手机网页</td></tr>
+      <tr><td>乱闪最高速度</td><td>20~80 毫秒 / 步</td><td class="num">35</td><td>手机网页</td></tr>
+      <tr><td>收束时长</td><td>0.4~1.5 秒</td><td class="num">0.7</td><td>手机网页</td></tr>
+      <tr><td>结果保持时间</td><td>5~60 秒</td><td class="num">15</td><td>手机网页</td></tr>
+      <tr><td>灯光颜色</td><td>任意色 / 呼吸 / 彩虹</td><td class="num">暖白</td><td>手机网页</td></tr>
+      <tr><td>提示音</td><td>开 / 关 / 音量</td><td class="num">开</td><td>手机网页</td></tr>
+    </tbody>
+  </table>
+  <p>所有参数存在芯片的 Flash 里，<b>断电不丢</b>。店里每天开关机不用重新设置。</p>
+
+  <h3>防误操作设计</h3>
+  <ul class="dot">
+    <li>结果展示期间按钮暂时失效，防止客人连拍把一局跳过去（时长可配）。</li>
+    <li>上电默认全灭待机，绝不会一通电就亮灯吓到人。</li>
+    <li>程序卡死时看门狗会 8 秒内自动复位回待机，不会停在半亮状态。</li>
+    <li>禁用开关状态每次启动都读，断电也保持。</li>
+  </ul>
+</section>
+
+<section>
+  <h2>七、控制方式对比</h2>
+  <p>您提到「遥控器或者是用线的方式」，实际上有三种通道，各有各的适用场景，建议组合使用：</p>
+  <table>
+    <thead><tr><th style="width:24%">方式</th><th>适合用来干什么</th><th class="num" style="width:12%">成本</th><th style="width:22%">评价</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>15 位拨动开关</b><br><span style="font-size:12px;color:var(--ink3)">线的方式</span></td>
+        <td>长期固定某盏不参与，比如老板自己那张桌、坏掉还没换的那颗</td><td class="num">¥30</td>
+        <td><span class="tag a">推荐必装</span>最可靠，员工一看就懂，断电保持</td>
+      </tr>
+      <tr>
+        <td><b>手机网页</b></td>
+        <td>临时改亮灯数量、颜色、速度、音量，全功能都在这里</td><td class="num">¥0</td>
+        <td><span class="tag a">推荐必装</span>不用装 App，但要连设备的 WiFi</td>
+      </tr>
+      <tr>
+        <td><b>433M 无线遥控</b></td>
+        <td>吧台随手切 2 / 3 盏，不用掏手机</td><td class="num">¥20</td>
+        <td><span class="tag">可选</span>方便，但只能做几个快捷功能</td>
+      </tr>
+      <tr>
+        <td><b>红外遥控</b></td>
+        <td>同上，按键更多（可指定任意灯号）</td><td class="num">¥15</td>
+        <td><span class="tag">不推荐</span>酒吧射灯和烟雾会让红外严重失灵</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>如果要在灯箱面板上装一个「2 盏 / 3 盏」的物理旋钮，也可以做，加一个两档旋转开关即可，约 ¥8。</p>
+</section>
+
+<section>
+  <h2>八、分工与交付</h2>
+  <div class="grid2">
+    <div class="card">
+      <div class="h">甲方（硬件）负责</div>
+      <ul>
+        <li>按清单采购物料</li>
+        <li>灯箱结构与开孔、灯珠固定</li>
+        <li>按接线图完成接线</li>
+        <li>提供 5V 电源与供电</li>
+        <li>现场安装与固定</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="h">乙方（软件）负责</div>
+      <ul>
+        <li>ESP32 固件源码（可直接烧录）</li>
+        <li>手机配置网页（内嵌固件，无需服务器）</li>
+        <li>接线图与引脚定义表</li>
+        <li>烧录图文教程（含环境配置）</li>
+        <li>联调支持与参数调优</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>交付物清单</h3>
+  <table>
+    <thead><tr><th style="width:36%">文件</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>firmware/</code> 工程源码</td><td>Arduino 框架，PlatformIO 打开即可编译烧录</td></tr>
+      <tr><td><code>firmware.bin</code> 成品固件</td><td>不想装开发环境时，用烧录工具直接写入</td></tr>
+      <tr><td><code>wiring.pdf</code> 接线图</td><td>含引脚定义、电源走线、开关阵列接法</td></tr>
+      <tr><td><code>烧录教程.md</code></td><td>从装驱动到烧录成功的每一步，带截图</td></tr>
+      <tr><td><code>参数说明.md</code></td><td>每个可调参数的实际效果说明</td></tr>
+      <tr><td><code>自检清单.md</code></td><td>通电后逐项测试，快速定位问题在哪一段</td></tr>
+    </tbody>
+  </table>
+
+  <h3>工期</h3>
+  <p>软件部分 <b>3 天内</b>交付第一版可烧录固件和配置页；硬件采购约 3~5 天到货，装配 1 天；联调半天。整体一周内可上场。</p>
+</section>
+
+<section>
+  <h2>九、需要您确认的五件事</h2>
+  <p>这几条会直接影响结构设计和软件参数，麻烦确认后我再出最终版：</p>
+  <table>
+    <thead><tr><th class="num" style="width:7%">#</th><th style="width:38%">问题</th><th>为什么必须确认</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>15 盏灯代表什么？<br>15 个客人 / 座位，还是 15 个"酒令格子"？</td><td>决定灯箱是环形排布还是网格排布，也决定亮灯结果怎么向客人解释</td></tr>
+      <tr><td class="num">2</td><td>灯箱装在哪？<br>挂墙、桌面摆件，还是吊装？</td><td>决定控制器放箱内还是箱外、按钮引出线留多长</td></tr>
+      <tr><td class="num">3</td><td>2 盏还是 3 盏，是开局前定好，还是每局随手切？</td><td>随手切就要在面板上加物理切换旋钮，不然每次都得掏手机</td></tr>
+      <tr><td class="num">4</td><td>要不要留每局的结果记录？</td><td>酒吧常有客人质疑公平，留记录可以随时调出来看。不需要就不做，省事</td></tr>
+      <tr><td class="num">5</td><td>灯的质感和颜色偏好？<br>彩色变幻，还是固定暖光？</td><td>要彩色就必须走方案 A；只要暖光的话，方案 B 的复古灯泡也能考虑</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>十、一句话总结</h2>
+  <div class="callout ok">
+    <p>硬件您按清单装配（约 400 元、半天工时），软件我们出固件和手机配置页（3 天）。核心是那句——<b>拍停瞬间软件先定好亮哪几盏，再用 0.7 秒减速动画演给客人看</b>。跑马灯本来无规律，所以这个"演"不会被识破，而亮 2 盏、亮 3 盏、排除某盏灯这些要求，全都能精确满足。</p>
+  </div>
+</section>
+
+<footer>15 灯跑马灯喝酒游戏 · 技术方案 v1.0 · 供甲方确认</footer>
+
+</div>
+</body>
+</html>

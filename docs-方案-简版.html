@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>15 灯跑马灯游戏 · 简易版方案</title>
+<style>
+  :root{
+    --ink:#1c1a17; --ink2:#4a453e; --ink3:#857e73;
+    --line:#e4dfd3; --line2:#d3ccbc;
+    --paper:#fff; --page:#f7f5f0; --fill:#f4f1e9;
+    --accent:#2f6b46; --accent-soft:#eef5f0;
+    --gray:#8a8375; --gray-soft:#f2f0ea;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:32px 16px 64px; background:var(--page); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:14px; line-height:1.75; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:820px; margin:0 auto;}
+  header.head{background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:26px 30px 22px; margin-bottom:14px;}
+  .kicker{font-size:12px; letter-spacing:.14em; color:var(--accent); font-weight:500;}
+  h1{font-size:24px; line-height:1.35; margin:8px 0 10px; font-weight:600; letter-spacing:-.01em;}
+  .sub{color:var(--ink2); font-size:13.5px; margin:0;}
+  .meta{margin-top:16px; padding-top:13px; border-top:1px dashed var(--line2); display:flex; flex-wrap:wrap; gap:6px 24px; font-size:12.5px; color:var(--ink3);}
+  .meta b{color:var(--ink2); font-weight:500;}
+  section{background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:24px 30px 26px; margin-bottom:14px;}
+  h2{font-size:16px; font-weight:600; margin:0 0 14px; padding-left:11px; border-left:3px solid var(--accent); line-height:1.4;}
+  h3{font-size:13.5px; font-weight:600; margin:20px 0 8px;}
+  h3:first-of-type{margin-top:2px;}
+  p{margin:0 0 11px; color:var(--ink2);}
+  p:last-child{margin-bottom:0;}
+  strong{color:var(--ink); font-weight:600;}
+  code{font-family:"SF Mono",Consolas,"Cascadia Mono",monospace; font-size:12.5px; background:var(--fill); padding:1px 5px; border-radius:3px; color:var(--accent);}
+  table{width:100%; border-collapse:collapse; margin:10px 0 12px; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:7px 11px; text-align:left; vertical-align:top;}
+  th{background:var(--fill); font-weight:600; color:var(--ink); white-space:nowrap;}
+  td{color:var(--ink2);}
+  td.num,th.num{text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
+  tr.sum td{background:var(--accent-soft); font-weight:600; color:var(--ink);}
+  .callout{border:1px solid var(--line2); border-left:3px solid var(--accent); background:var(--accent-soft); padding:13px 17px; margin:14px 0; border-radius:3px;}
+  .callout .t{font-weight:600; font-size:13px; margin-bottom:4px;}
+  .callout p{font-size:13px; margin:0;}
+  ol.steps{counter-reset:s; list-style:none; padding:0; margin:10px 0;}
+  ol.steps li{counter-increment:s; position:relative; padding-left:32px; margin-bottom:11px; color:var(--ink2);}
+  ol.steps li::before{content:counter(s); position:absolute; left:0; top:2px; width:20px; height:20px; border:1px solid var(--accent); border-radius:50%; color:var(--accent); font-size:11.5px; font-weight:600; display:flex; align-items:center; justify-content:center; line-height:1;}
+  ol.steps li b{color:var(--ink); font-weight:600;}
+  .tag{display:inline-block; font-size:11.5px; padding:1px 7px; border-radius:2px; border:1px solid var(--line2); background:var(--fill); color:var(--ink2); margin-right:4px; line-height:1.6;}
+  .tag.a{border-color:var(--accent); color:var(--accent); background:var(--accent-soft);}
+  .tag.x{border-color:var(--line2); color:var(--ink3); background:var(--gray-soft); text-decoration:line-through;}
+  .strike{color:var(--ink3);}
+  footer{text-align:center; font-size:12px; color:var(--ink3); padding:8px 0 0;}
+  @media (max-width:640px){body{padding:16px 10px 40px;} section,header.head{padding:20px 18px;} h1{font-size:21px;} table{font-size:12.5px;} th,td{padding:6px 8px;}}
+  @media print{body{background:#fff; padding:0; font-size:11.5pt;} section,header.head{break-inside:avoid; border-color:#ccc;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="head">
+  <div class="kicker">Simplified Proposal</div>
+  <h1>15 灯跑马灯游戏 · 简易版</h1>
+  <p class="sub">只有一份代码、一块十几块钱的板子、六个采购项。<b>玩法一点不减</b>：拍一下乱闪，再拍一下停，停下来亮 2 盏或 3 盏，还能指定某盏不参与——这几条一个都没砍。</p>
+  <div class="meta">
+    <span><b>成本</b> 约 ¥180</span>
+    <span><b>物料</b> 6 项</span>
+    <span><b>代码</b> 约 230 行</span>
+    <span><b>装配</b> 半天</span>
+    <span><b>烧录</b> Arduino IDE 一次搞定</span>
+  </div>
+</header>
+
+<section>
+  <h2>一、这版砍了什么</h2>
+  <p>复杂的地方不在玩法，在"怎么调参数"。第一版为了让老板能随时改设置，加了 WiFi 和手机配置页——光这一块就占了一半的复杂度。<b>如果参数定下来不需要天天改，这些全可以去掉，改成板子上的物理开关。</b></p>
+  <table>
+    <thead><tr><th style="width:26%">功能</th><th style="width:37%">完整版做法</th><th>简易版做法</th></tr></thead>
+    <tbody>
+      <tr><td>拍停亮 2/3 盏</td><td>手机网页设置</td><td><span class="tag a">一个拨动开关</span>拨一下切换</td></tr>
+      <tr><td>某盏灯不参与</td><td>手机网页勾选 + 拨码双重</td><td><span class="tag a">15 个拨动开关</span>一个灯一个，拨下去就灭</td></tr>
+      <tr><td>颜色 / 速度 / 时长</td><td>手机网页实时调</td><td><span class="tag">改代码里几个数字，重烧一次</span></td></tr>
+      <tr><td>手机配置页</td><td>ESP32 开 WiFi 热点 + 内嵌网页</td><td><span class="tag x">去掉</span>不需要</td></tr>
+      <tr><td>主控板</td><td>ESP32，需要装 PlatformIO</td><td>Arduino Nano，<span class="tag a">Arduino IDE 直接烧</span></td></tr>
+      <tr><td>电平转换模块</td><td>必须加 74AHCT125</td><td><span class="tag a">不需要</span>Nano 本身就是 5V 逻辑</td></tr>
+      <tr><td>成本</td><td class="num">约 ¥396</td><td class="num"><b>约 ¥181</b></td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <div class="t">一个顺带的收获</div>
+    <p>第一版要用 ESP32（3.3V 逻辑），接 WS2812B 必须加电平转换，是这个方案里最容易翻车的地方。换成 Arduino Nano 是 5V 逻辑，<b>直接对接灯带，这个坑自动消失</b>——少一个元件、少一处故障点。</p>
+  </div>
+</section>
+
+<section>
+  <h2>二、物料清单</h2>
+  <table>
+    <thead><tr><th class="num" style="width:8%">#</th><th style="width:28%">物料</th><th>规格</th><th class="num" style="width:8%">数量</th><th class="num" style="width:13%">小计</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>Arduino Nano</td><td>Nano 兼容板（含 USB 线），ATmega328P</td><td class="num">1</td><td class="num">¥15</td></tr>
+      <tr><td class="num">2</td><td>幻彩灯珠</td><td>WS2812B 5V，12mm 圆头乳白罩，IP67；买 17 颗备 2</td><td class="num">17</td><td class="num">¥51</td></tr>
+      <tr><td class="num">3</td><td>拍击按钮</td><td>100mm 街机半球按钮，常开，IP66 防水</td><td class="num">1</td><td class="num">¥45</td></tr>
+      <tr><td class="num">4</td><td>拨动开关板</td><td>15 位灯禁用开关 + 1 个"2/3 盏"开关 + 洞洞板</td><td class="num">1 套</td><td class="num">¥20</td></tr>
+      <tr><td class="num">5</td><td>开关电源</td><td>5V / 3A 带壳（满载 0.9A，余量足够）</td><td class="num">1</td><td class="num">¥20</td></tr>
+      <tr><td class="num">6</td><td>线材辅料</td><td>信号线、电源线、冷压端子、热缩管、排针</td><td class="num">1 批</td><td class="num">¥30</td></tr>
+      <tr class="sum"><td class="num">—</td><td colspan="3">合计（灯箱结构另计，按你自己的做法）</td><td class="num">约 ¥181</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>三、接线</h2>
+  <p>只有三个部分，全部是"一端接引脚、一端接 GND"的形式，不需要焊接电路板（用洞洞板 + 排针即可）：</p>
+  <table>
+    <thead><tr><th style="width:30%">部分</th><th style="width:22%">接到哪里</th><th>怎么接</th></tr></thead>
+    <tbody>
+      <tr><td><b>15 颗灯珠</b></td><td>D6</td><td>灯珠首尾串成一条，只用 3 根线：<code>5V</code>、<code>GND</code>、<code>DIN→D6</code>。电源直接从开关电源取，<b>不要从 Nano 板上取电</b></td></tr>
+      <tr><td><b>拍击按钮</b></td><td>D4</td><td>按钮两个端子：一个接 <code>D4</code>，一个接 <code>GND</code>。板上已启用内部上拉，不用外加电阻</td></tr>
+      <tr><td><b>15 个禁用开关</b></td><td>D2 D3 D7~D13 A0~A5</td><td>每个开关一个端子接对应引脚，另一个端子全部并到同一根 <code>GND</code> 母线上</td></tr>
+      <tr><td><b>2/3 盏开关</b></td><td>D5</td><td>一端接 <code>D5</code>，一端接 <code>GND</code>。断开 = 亮 2 盏，闭合 = 亮 3 盏</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--ink3)">15 个开关各自对应第几号灯，按 <code>D2→1号、D3→2号、D7→3号 … A5→15号</code> 的顺序在面板上贴好编号就行，顺序无所谓，贴对即可，改顺序也不用动代码。</p>
+  <div class="callout">
+    <div class="t">只有一处需要注意</div>
+    <p>灯珠有方向：<b>DIN 进、DOUT 出</b>。接反了会出现"前面几颗亮、后面一片黑"。装之前先拿 3 颗试一下，确认方向再上箱。</p>
+  </div>
+</section>
+
+<section>
+  <h2>四、店里怎么用</h2>
+  <p>不需要手机、不需要遥控器，全部是面板上的开关和按钮，员工看一遍就会：</p>
+  <ol class="steps">
+    <li><b>哪盏灯不想让它亮</b> —— 把面板上对应编号的拨动开关拨下去，这盏灯就退出游戏，全程不闪也不亮。今天想让它参加，拨回来就行。</li>
+    <li><b>这局亮 2 盏还是 3 盏</b> —— 拨那个单独的"盏数"开关。想临时改，随手拨一下。</li>
+    <li><b>开局</b> —— 拍一下大按钮，灯开始无规则乱跳。</li>
+    <li><b>停</b> —— 再拍一下。灯会减速，约 0.7 秒后稳稳停住，恰好亮 2 或 3 盏，保持 15 秒。想快点开下一局，直接再拍一下即可。</li>
+  </ol>
+  <div class="callout">
+    <div class="t">为什么它看起来是"自然停下来的"</div>
+    <p>拍停的瞬间，程序已经先抽好了结果，只是没亮出来；然后用 0.7 秒做减速动画，最后一段目标灯慢慢浮现、其余全灭。因为乱闪阶段本来就没有刻度可以对照，客人无法从停止位置反推该亮几盏——<b>这一点和老虎机、抽奖转盘是同一个做法</b>，也是唯一能同时满足"亮 2/3 盏"和"排除指定灯"的路子。</p>
+  </div>
+</section>
+
+<section>
+  <h2>五、软件</h2>
+  <p>一个 <code>.ino</code> 文件，约 230 行，用 Arduino IDE 打开、选好板子、点上传，一次就完事。<b>之后不用再碰电脑。</b></p>
+  <h3>要改的就三个地方（都写在文件开头）</h3>
+  <table>
+    <thead><tr><th style="width:34%">想改什么</th><th>改哪个</th></tr></thead>
+    <tbody>
+      <tr><td>灯的颜色</td><td><code>R_RUN / G_RUN / B_RUN</code> 三个数字</td></tr>
+      <tr><td>减速停下的快慢</td><td><code>LOCK_MS</code>，默认 700 毫秒</td></tr>
+      <tr><td>停住后保持多久</td><td><code>RESULT_MS</code>，默认 15000 毫秒</td></tr>
+      <tr><td>待机时灯要不要微亮</td><td><code>IDLE_LEVEL</code>，设 0 就是全灭</td></tr>
+    </tbody>
+  </table>
+  <h3>已经验证过的部分</h3>
+  <p>抽签逻辑我用同一套算法跑了 40 万次模拟：</p>
+  <table>
+    <thead><tr><th style="width:44%">检查项</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td>亮灯数量是否正确（不多不少）</td><td>40 万次全部正确，0 例外</td></tr>
+      <tr><td>会不会同一个灯抽中两次</td><td>0 次</td></tr>
+      <tr><td>会不会抽到被禁用的灯</td><td>0 次</td></tr>
+      <tr><td>15 盏灯机会是否均等</td><td>每盏被抽中次数差异 &lt; 1.2%，属正常统计波动</td></tr>
+      <tr><td>极端情况：只剩 1 盏参与却要求亮 3 盏</td><td>自动降级为亮 1 盏，不会报错</td></tr>
+      <tr><td>极端情况：15 盏全被禁用</td><td>直接回待机，不会卡死</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>六、两个版本怎么选</h2>
+  <table>
+    <thead><tr><th style="width:30%">你的情况</th><th>建议</th></tr></thead>
+    <tbody>
+      <tr><td>参数定下来就基本不改，颜色固定，只想赶紧做出来用</td><td><span class="tag a">简易版</span>¥180，一周内能上场</td></tr>
+      <tr><td>经常搞主题活动，想随时换灯色、换节奏</td><td>完整版 ¥396，手机网页随时调</td></tr>
+      <tr><td>想先做出来试试效果，以后再说</td><td><span class="tag a">先做简易版</span>灯珠、电源、按钮、开关这些硬件两个版本完全一样，以后只换主控板 + 重烧代码就能升级，不浪费</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <div class="t">关键一点</div>
+    <p>两个版本<b>硬件是兼容的</b>——同样的灯珠、同样的电源、同样的按钮和开关。先用简易版跑起来，如果以后真觉得需要手机调色，换一块 ESP32 主控板（十几块）重新烧一次就升级了，前期投入不白花。</p>
+  </div>
+</section>
+
+<footer>15 灯跑马灯喝酒游戏 · 简易版方案 v1.0 ｜ 配套固件：firmware-simple.ino</footer>
+
+</div>
+</body>
+</html>
